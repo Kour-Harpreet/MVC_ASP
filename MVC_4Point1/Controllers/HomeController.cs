@@ -20,10 +20,19 @@ namespace MVC_4Point1.Controllers
 
         public IActionResult Index()
         {
+            // "return View()" will call the view that is associated with the path "baseurl.com/Controller/Action".
+            // In this case baseurl.com/Home/Index or Views/Home/Index.cshtml.
             return View();
         }
 
         public IActionResult Privacy()
+        {
+            // In this case we call baseurl.com/Home/Privacy or Views/Home/Privacy.cshtml.
+
+            return View();
+        }
+
+        public IActionResult Test()
         {
             return View();
         }
