@@ -31,9 +31,17 @@ namespace MVC_4Point1.Controllers
 
             return View();
         }
+        // When we click our "Test Page" link in the menu, it calls:
+        //      asp-controller="Home" asp-action="Test"
+        // This means it will call the controller called "HomeController" (not just "Home"), and the action method called "Test()".
+
 
         public IActionResult Test()
         {
+            // This will output to the "Output" tab, allowing for console-like debugging outputs in an MVC application.
+            // Debug.WriteLine("--------------------\nDEBUGGING OUTPUT: Test() Action Called!\n--------------------");
+
+
             return View();
         }
 
