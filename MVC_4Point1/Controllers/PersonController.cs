@@ -20,10 +20,11 @@ namespace MVC_4Point1.Controllers
 
         public IActionResult Index()
         {
-            return RedirectToAction("List");
+            return RedirectToAction("List"); //output is in list
+
         }
 
-        public IActionResult Create(string name, string email, string phone)
+        public IActionResult Create(string id, string name, string email, string phone)
         {
             // When this Action gets called, there are 3 likely states:
             // 1) First page load, no data has been provided (initial state).
@@ -33,11 +34,12 @@ namespace MVC_4Point1.Controllers
             // A request has come in that has some data stored in the query (GET or POST).
             if (Request.Query.Count > 0)
             {
-                if (name != null && email != null && phone != null)
+                if (id != null && name != null && email != null && phone != null)
                 {
                     // All expected data provided, so this will be our submit state.
                     AppPeople.Add(new Person()
                     {
+                        ID = int.Parse(id),
                         Name = name,
                         Email = email,
                         Phone = phone
@@ -52,6 +54,7 @@ namespace MVC_4Point1.Controllers
                     ViewBag.Error = "Not all fields have had values provided.";
 
                     // Store our data to re-add to the form.
+                    ViewBag.ID = id;
                     ViewBag.Name = name;
                     ViewBag.Email = email;
                     ViewBag.Phone = phone;
@@ -65,13 +68,37 @@ namespace MVC_4Point1.Controllers
 
         public IActionResult List()
         {
+            ViewBag.People = AppPeople;
+
             return View();
         }
 
-        public IActionResult Details()
+        public IActionResult Details(string id, string delete)
         {
-            return View();
+            IActionResult result;
+            if (delete != null)
+            {
+                DeletePersonByID(int.Parse(id));
+                result = RedirectToAction("List");
+            }
+            else
+            {
+                ViewBag.Person = GetPersonByID(int.Parse(id));
+                result = View();
+            }
+
+            return result;
+        }
+        public Person GetPersonByID(int id)
+        {
+            return AppPeople.Where(x => x.ID == id).Single();
         }
 
+        public void DeletePersonByID(int id)
+        {
+            AppPeople.Remove(AppPeople.Where(x => x.ID == id).Single());
+
+
+        }
     }
 }
