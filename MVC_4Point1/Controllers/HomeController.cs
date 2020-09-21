@@ -46,7 +46,8 @@ namespace MVC_4Point1.Controllers
 
             // We assign the data that is stored in our parameter to the ViewBag for use in the page.
 
-            ViewBag.GETParameterData = content;
+            // By Null-Coalescing, we can ensure that the ViewBag has at least something, even if the GET parameter is not provided.
+            ViewBag.GETParameterData = content ?? "No Data Provided";
 
 
             return View();
