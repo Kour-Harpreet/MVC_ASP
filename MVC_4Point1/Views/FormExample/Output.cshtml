@@ -1,10 +1,29 @@
 ﻿
 @{
     ViewData["Title"] = "Output";
+    // - First Letter of First Name
+    // - First Letter of Last Name (Assume 2 word names)
+    // - Length of First Name
+    // - Length of Last Name
+    // - Domain of Email (ex "example.com")
+    // - Area code of phone number (Assume 1-###-234-3456 OR ###-456-9876)
+
+    string[] names = ViewBag.Name.Split(' ');
+    string[] splitEmail = ViewBag.Email.Split('@');
+    string[] phoneSegments = ViewBag.Phone.Split('-');
 }
 
-<h1>Output</h1>
+
 
 <h1>Output</h1>
 
-<p>Hello, @(ViewBag.Name)! I've been told that I can contact you at @(ViewBag.Email), or by phone at @(ViewBag.Phone).</p> 
+
+<p>Hello, @(ViewBag.Name)! I've been told that I can contact you at @(ViewBag.Email), or by phone at @(ViewBag.Phone).</p>
+
+
+<p>The first letter of your first name is: @(names[0][0]).</p>
+<p>The first letter of your last name is: @(names[1][0]).</p>
+<p>The length of your first name is @(names[0].Length).</p>
+<p>The length of your last name is @(names[1].Length).</p>
+<p>The domain of your email address is @(splitEmail[1]).</p>
+<p>The area code of your phone number is @(phoneSegments[0] == "1" ? phoneSegments[1] : phoneSegments[0]).</p>
