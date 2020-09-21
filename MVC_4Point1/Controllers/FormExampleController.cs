@@ -12,5 +12,18 @@ namespace MVC_4Point1.Controllers
         {
             return View();
         }
+        public IActionResult Input()
+        {
+            return View();
+        }
+
+        public IActionResult Output(string name, string email, string phone)
+        {
+            ViewBag.Name = name;
+            ViewBag.Email = email;
+            ViewBag.Phone = phone;
+
+            return View();
+        }
     }
 }
