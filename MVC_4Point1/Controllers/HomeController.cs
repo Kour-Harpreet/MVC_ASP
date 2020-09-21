@@ -36,10 +36,17 @@ namespace MVC_4Point1.Controllers
         // This means it will call the controller called "HomeController" (not just "Home"), and the action method called "Test()".
 
 
-        public IActionResult Test()
+        // The get parameter content will be stored in the content parameter when the action is called.
+        public IActionResult Test(string content)
         {
             // This will output to the "Output" tab, allowing for console-like debugging outputs in an MVC application.
+
              Debug.WriteLine("--------------------\nDEBUGGING OUTPUT: Test() Action Called!\n--------------------");
+            // If we want the View to be able to see the content, we can forward it along using the ViewBag.
+
+            // We assign the data that is stored in our parameter to the ViewBag for use in the page.
+
+            ViewBag.GETParameterData = content;
 
 
             return View();
