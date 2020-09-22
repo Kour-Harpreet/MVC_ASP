@@ -74,8 +74,11 @@ namespace MVC_4Point1.Controllers
 
         public IActionResult List()
         {
-            //ViewBag.People = AppPeople;
-
+            // Just like with Create() all we have to do is translate our logic from List to Context.
+            using (PersonContext context = new PersonContext())
+            {
+                ViewBag.People = context.People.ToList();
+            }
             return View();
         }
 
@@ -97,8 +100,20 @@ namespace MVC_4Point1.Controllers
         }
         public Person GetPersonByID(int id)
         {
-            return null;
-            // return AppPeople.Where(x => x.ID == id).Single();
+            Person target;
+            // We have to make a separate query for phone numbers, unless we use something called a DTO (Data Transfer Object) to bind them to.
+            // Due to time constraints that may or may not be covered, so this is a workaround.
+            List<PhoneNumber> phoneNumbers;
+            using (PersonContext context = new PersonContext())
+            {
+                target = context.People.Where(x => x.ID == id).Single();
+                phoneNumbers = context.PhoneNumbers.Where(x => x.PersonID == target.ID).ToList();
+            }
+            // When we initially query to get the "target", EF will only enumerate (retreive) the records from THAT table (by default).
+            // This is a workaround to make sure that the phone numbers are assigned to the object that gets returned.
+            // There are better and more efficient ways to do this, but this will serve our purposes and is easier to understand at face value.
+            target.PhoneNumbers = phoneNumbers;
+            return target;
         }
 
         public void DeletePersonByID(int id)
