@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using MVC_4Point1.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MVC_4Point1
 {
@@ -24,6 +27,8 @@ namespace MVC_4Point1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            // This is 100% necessary to use the context with scaffolded views. 
+            services.AddDbContext<PersonContext>(options => options.UseMySql("server=localhost;port=3306;user=root;database=mvc_example"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
