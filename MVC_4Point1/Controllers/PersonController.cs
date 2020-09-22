@@ -39,10 +39,7 @@ namespace MVC_4Point1.Controllers
                     // All expected data provided, so this will be our submit state.
                     AppPeople.Add(new Person()
                     {
-                        ID = int.Parse(id),
-                        Name = name,
-                        Email = email,
-                        Phone = phone
+                        
                     });
 
                     ViewBag.Success = "Successfully added the person to the list.";
