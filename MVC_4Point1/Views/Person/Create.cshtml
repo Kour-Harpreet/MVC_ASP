@@ -7,11 +7,17 @@
 @{
     if (ViewBag.Success != null)
     {
-    <p class="alert-success">Success! @(ViewBag.Success)</p>
+        <p class="alert-success">Success! @(ViewBag.Success)</p>
     }
-    else if (ViewBag.Error != null)
+    else if (ViewBag.Exception != null)
     {
-    <p class="alert-danger">Error! @(ViewBag.Error)</p>
+        <p class="alert-danger">Errors detected in your form submission, please correct the following and resubmit:</p>
+        <ul class="alert-danger">
+            @foreach (Exception e in ViewBag.Exception.SubExceptions)
+            {
+                <li>@(e.Message)</li>
+            }
+        </ul>
     }
 }
 
