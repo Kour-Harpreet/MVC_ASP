@@ -20,7 +20,10 @@ namespace MVC_4Point1.Models
         [Column("PersonID", TypeName = "int(10)")]
         public int PersonID { get; set; }
 
+        // This attribute specifies which database field is the foreign key. Typically in the child (many side of the 1-many).
         [ForeignKey(nameof(PersonID))]
+
+        // InverseProperty links the two virtual properties together.
         [InverseProperty(nameof(Models.Person.PhoneNumbers))]
         public virtual Person Person { get; set; }
     }

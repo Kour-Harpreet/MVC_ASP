@@ -77,15 +77,16 @@ namespace MVC_4Point1.Models
             modelBuilder.Entity<PhoneNumber>(entity =>
             {
                 entity.HasIndex(e => e.PersonID)
-                    .HasName("FK_PhoneNumber_Person");
+                     .HasName("FK_" + nameof(PhoneNumber) + "_" + nameof(Person));
 
                 entity.Property(e => e.Number)
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
 
-                entity.HasOne(d => d.Person)
-                    .WithMany(p => p.PhoneNumbers)
-                    .HasForeignKey(d => d.PersonID)
+                // Always in the one with the foreign key.
+                entity.HasOne(child => child.Person)
+                    .WithMany(parent => parent.PhoneNumbers)
+                    .HasForeignKey(child => child.PersonID)
                     /*   .OnDelete(DeleteBehavior.Restrict)*/  //for delete restriction on database.
 
 
@@ -95,7 +96,7 @@ namespace MVC_4Point1.Models
                     // SetNull: Set the foreign key field to null on any orphaned child records.
                     // NoAction: Don't commit any deletions of parents which would orphan a child.
                     .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_PhoneNumber_Person");
+                                 .HasConstraintName("FK_" + nameof(PhoneNumber) + "_" + nameof(Person));
                 entity.HasData(
                        new PhoneNumber()
                        {

@@ -10,6 +10,7 @@ namespace MVC_4Point1.Models
     [Table("person")]
     public partial class Person
     {
+        // This initializes an empty list so we don't get null reference exceptions for our list.
         public Person()
         {
             PhoneNumbers = new HashSet<PhoneNumber>();
@@ -27,6 +28,7 @@ namespace MVC_4Point1.Models
         [Column(TypeName = "varchar(50)")]
         public string LastName { get; set; }
 
+        // InverseProperty links the two virtual properties together.
         [InverseProperty(nameof(Models.PhoneNumber.Person))]
         public virtual ICollection<PhoneNumber> PhoneNumbers { get; set; }
     }
