@@ -4,6 +4,12 @@
 }
 
 <h1>List</h1>
+<form action="/Person/List" method="get">
+    <label for="filter">Filter to Only Multiple Phone Numbers</label>
+    <input type="checkbox" name="filter" @if (ViewBag.Filter == "on") { @("checked") } />
+    <button type="submit">Filter</button>
+</form>
+
 <label for="personID">Person</label>
 <select name="personID" id="personID">
     @foreach (Person person in ViewBag.People)
