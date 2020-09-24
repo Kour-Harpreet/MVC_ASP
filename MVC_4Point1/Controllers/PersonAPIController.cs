@@ -109,6 +109,13 @@ namespace MVC_4Point1.Controllers
 
         //6.
         // Add a second endpoint for the "name starts with" that uses the query string and not the URL.
-        
+        [HttpGet("People/StartsWith")]
+        public ActionResult<object> GetPeopleWhoseNamesStartWithParameterized(string startChar)
+        {
+            // This is what we are returning. It gets serialized as JSON if we return an object.
+         return new PersonController().GetPeopleStartingWith(startChar);
+
+           
+        }
     }
 }
