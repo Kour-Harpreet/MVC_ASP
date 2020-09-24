@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MVC_4Point1.Exceptions;
 using MVC_4Point1.Models;
 
 namespace MVC_4Point1.Controllers
 {
     public class PersonController : Controller
     {
- 
-
+        // In-class practice:
+        // Add validation to ensure that the first and last name do not contain numbers.
+        // Add trimming to the CreatePerson method.
+        // Add validation that neither first nor last name are greater than 50 characters long.
         public IActionResult Index()
         {
-            return RedirectToAction("List"); //output is in list
-
+            return RedirectToAction("List");
         }
-
         // id is not necessary as it is now AUTO_INCREMENT in the database, and is generated thereby.
         public IActionResult Create(string firstName, string lastName, string phone)
         {
@@ -24,64 +25,126 @@ namespace MVC_4Point1.Controllers
             // 1) First page load, no data has been provided (initial state).
             // 2) Partial data has been provided (error state).
             // 3) Complete data has been provided (submit state).
-
             // A request has come in that has some data stored in the query (GET or POST).
+
             if (Request.Query.Count > 0)
             {
-                if (firstName != null && lastName != null && phone != null)
+                try
                 {
-                    // All expected data provided, so this will be our submit state.
-                    // Replace the list add with a context add.
-                    // Generate the new model instances to be added to the database.
-                    Person newPerson = new Person()
-                    {
-                        FirstName = firstName,
-                        LastName = lastName
-                    };
-                    PhoneNumber newPhoneNumber = new PhoneNumber()
-                    {
-                        Number = phone,
-                        Person = newPerson
-                    };
-                    // Add the new model instances to the database.
-                    using (PersonContext context = new PersonContext())
-                    {
-
-                        context.People.Add(newPerson);
-                        context.PhoneNumbers.Add(newPhoneNumber);
-                        context.SaveChanges();
-                    }
-
+                    CreatePerson(firstName, lastName, phone);
                     ViewBag.Success = "Successfully added the person to the list.";
+                }
+                catch (PersonValidationException e)
+                {
+                    // All expected data not provided, so this will be our error state.
+                    ViewBag.Exception = e;
+                    // Store our data to re-add to the form.
+                    ViewBag.FirstName = firstName != null ? firstName.Trim() : null;
+                    ViewBag.LastName = lastName != null ? lastName.Trim() : null;
+                    ViewBag.Phone = phone != null ? phone.Trim() : null;
+                }
+            }
+            return View();
+        }
+        public void CreatePerson(string firstName, string lastName, string phone)
+        {
+            firstName = firstName != null ? firstName.Trim() : null;
+            lastName = lastName != null ? lastName.Trim() : null;
+            phone = phone != null ? phone.Trim() : null;
+            PersonValidationException exception = new PersonValidationException();
+            // Be a little more specific than "== null" because that doesn't account for whitespace.
+            if (string.IsNullOrWhiteSpace(firstName))
+            {
+                exception.SubExceptions.Add(new Exception("First name was not provided."));
+            }
+            if (firstName.Any(x => char.IsDigit(x)))
+            {
+                exception.SubExceptions.Add(new Exception("First name cannot contain numbers."));
+            }
+            if (firstName.Length > 50)
+            {
+                exception.SubExceptions.Add(new Exception("First name cannot be more than 50 characters long."));
+            }
+            if (string.IsNullOrWhiteSpace(lastName))
+            {
+                exception.SubExceptions.Add(new Exception("Last name was not provided."));
+            }
+            if (lastName.Any(x => char.IsDigit(x)))
+            {
+                exception.SubExceptions.Add(new Exception("Last name cannot contain numbers."));
+            }
+            if (lastName.Length > 50)
+            {
+                exception.SubExceptions.Add(new Exception("Last name cannot be more than 50 characters long."));
+            }
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                exception.SubExceptions.Add(new Exception("Phone number was not provided."));
+            }
+            else
+            {
+                // Check for phone number formatting (feel free to use RegEx or any other method).
+                // Has to be in the else branch to avoid null reference exceptions.
+                int temp;
+                string[] phoneParts = phone.Split('-');
+                if (!(
+                    phoneParts[0].Length == 3 &&
+                    int.TryParse(phoneParts[0], out temp) &&
+                    phoneParts[1].Length == 3 &&
+                    int.TryParse(phoneParts[1], out temp) &&
+                    phoneParts[2].Length == 4 &&
+                    int.TryParse(phoneParts[2], out temp)
+                    ))
+                {
+                    exception.SubExceptions.Add(new Exception("Phone number was not in a valid format."));
+                }
+            }
+            // If any exceptions have been generated by any validation, throw them as one bundled exception.
+            if (exception.SubExceptions.Count > 0)
+            {
+                throw exception;
+            }
+            // If we're at this point, we have no exceptions, as nothing got thrown.
+            Person newPerson = new Person()
+            {
+                FirstName = firstName,
+                LastName = lastName
+            };
+            PhoneNumber newPhoneNumber = new PhoneNumber()
+            {
+                Number = phone,
+                Person = newPerson
+            };
+            // Add the new model instances to the database.
+            using (PersonContext context = new PersonContext())
+            {
+                context.People.Add(newPerson);
+                context.PhoneNumbers.Add(newPhoneNumber);
+                context.SaveChanges();
+            }
+        }
 
+        public IActionResult List(string filter)
+        {
+           
+
+                // Slightly different from practice as you'll be calling methods and not using a "using" in your action.
+                if (filter == "on")
+                {
+                    
+
+                    ViewBag.People = GetPeopleWithMultiplePhoneNumbers();
+                    ViewBag.Filter = filter;
                 }
                 else
                 {
-                    // All expected data not provided, so this will be our error state.
-                    ViewBag.Error = "Not all fields have had values provided.";
-
-                    // Store our data to re-add to the form.
-                    ViewBag.FirstName = firstName;
-                    ViewBag.LastName = lastName;
-                    ViewBag.Phone = phone;
+                    ViewBag.People = GetPeople();
                 }
-            }
-            // else
-            // No request, so this will be our inital state.
+
+
 
             return View();
         }
-
-        public IActionResult List()
-        {
-            // Just like with Create() all we have to do is translate our logic from List to Context.
-            using (PersonContext context = new PersonContext())
-            {
-                ViewBag.People = context.People.ToList();
-            }
-            return View();
-        }
-
         public IActionResult Details(string id, string delete)
         {
             IActionResult result;
@@ -95,8 +158,22 @@ namespace MVC_4Point1.Controllers
                 ViewBag.Person = GetPersonByID(int.Parse(id));
                 result = View();
             }
-
             return result;
+        }
+
+        public List<Person> GetPeople()
+        {
+            using (PersonContext context = new PersonContext())
+            {
+                return context.People.ToList();
+            }
+        }
+        public List<Person> GetPeopleWithMultiplePhoneNumbers()
+        {
+            using (PersonContext context = new PersonContext())
+            {
+                return context.People.Where(x => x.PhoneNumbers.Count > 1).ToList();
+            }
         }
         public Person GetPersonByID(int id)
         {
@@ -115,7 +192,6 @@ namespace MVC_4Point1.Controllers
             target.PhoneNumbers = phoneNumbers;
             return target;
         }
-
         public void DeletePersonByID(int id)
         {
             using (PersonContext context = new PersonContext())
@@ -123,7 +199,6 @@ namespace MVC_4Point1.Controllers
                 context.People.Remove(context.People.Where(x => x.ID == id).Single());
                 context.SaveChanges();
             }
-
 
         }
     }
