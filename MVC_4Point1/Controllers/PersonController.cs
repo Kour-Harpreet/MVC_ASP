@@ -175,6 +175,13 @@ namespace MVC_4Point1.Controllers
                 return context.People.Where(x => x.PhoneNumbers.Count > 1).ToList();
             }
         }
+        public List<Person> GetPeopleWhoseNameStartsWithJ()
+        {
+            using (PersonContext context = new PersonContext())
+            {
+                return context.People.Where(x => x.FirstName.StartsWith("J")).ToList();
+            }
+        }
         public Person GetPersonByID(int id)
         {
             Person target;
