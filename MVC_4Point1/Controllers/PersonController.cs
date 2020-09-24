@@ -168,6 +168,14 @@ namespace MVC_4Point1.Controllers
                 return context.People.ToList();
             }
         }
+        public List<Person> GetPeopleStartingWith(string startChar)
+        {
+            using (PersonContext context = new PersonContext())
+            {
+                return context.People.Where(x => x.FirstName.StartsWith(startChar)).ToList();
+            }
+
+        }
         public List<Person> GetPeopleWithMultiplePhoneNumbers()
         {
             using (PersonContext context = new PersonContext())
