@@ -49,8 +49,8 @@ namespace MVC_4Point1.Controllers
             return View();
         }
 
-  
-        // Do NOT do this in practices, have a separate create for phone numbers.
+     
+         // Do NOT do this in practices, have a separate create for phone numbers.
         // The only reason I did this is we scaffolded the phone number table and I didn't want to cause conflicts.
         public int CreatePerson(string firstName, string lastName, string phone)
         {
@@ -67,10 +67,10 @@ namespace MVC_4Point1.Controllers
                 
                 exception.SubExceptions.Add(new ArgumentNullException(nameof(firstName), "First name was not provided."));
             }
-           
+            
             else
                     {
-                        exception.SubExceptions.Add(new Exception("First name cannot be more than 50 characters long."));
+                       
                         if (firstName.Any(x => char.IsDigit(x)))
                         {
                             exception.SubExceptions.Add(new ArgumentException(nameof(firstName), "First name cannot contain numbers."));
@@ -86,10 +86,10 @@ namespace MVC_4Point1.Controllers
                 
                 exception.SubExceptions.Add(new ArgumentNullException(nameof(lastName), "Last name was not provided."));
             }
-            
+           
             else
                     {
-                       
+                        
                         if (lastName.Any(x => char.IsDigit(x)))
                         {
                             exception.SubExceptions.Add(new ArgumentException(nameof(lastName), "Last name cannot contain numbers."));
@@ -296,7 +296,7 @@ namespace MVC_4Point1.Controllers
             // We have to make a separate query for phone numbers, unless we use something called a DTO (Data Transfer Object) to bind them to.
             // Due to time constraints that may or may not be covered, so this is a workaround.
             List<PhoneNumber> phoneNumbers;
-          
+        
             using (PersonContext context = new PersonContext())
             {
                 target = context.People.Where(x => x.ID == id).Single();

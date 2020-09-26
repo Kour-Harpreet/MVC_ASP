@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MVC_4Point1.Models;
-/*using MVC_4Point1.Models.Exceptions;*/
+
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
+using MVC_4Point1.Exceptions;
 
 namespace MVC_4Point1.Controllers
 {
@@ -96,17 +97,28 @@ namespace MVC_4Point1.Controllers
         // This is the return type of the request. The method name is irrelevant as far as the clients are concerned.
         public ActionResult<object> GetPersonWithID(int id)
         {
+            ActionResult<object> response;
             // This is what we are returning. It gets serialized as JSON if we return an object.
-            Person person = new PersonController().GetPersonByID(id);
-            // This is "kind of" a DTO. We're putting the fields we care about into another object that is not the database model.
-            // They help get around errors like the circular references, and (if you use them in the context) the missing virtual properties.
-            return new
+            try
             {
-                id = person.ID,
-                firstName = person.FirstName,
-                lastName = person.LastName,
-                phoneNumbers = person.PhoneNumbers.Select(x => x.Number)
-            };
+                Person person = new PersonController().GetPersonByID(id);
+
+                // This is "kind of" a DTO. We're putting the fields we care about into another object that is not the database model.
+                // They help get around errors like the circular references, and (if you use them in the context) the missing virtual properties.
+                response = new
+                {
+                    id = person.ID,
+                    firstName = person.FirstName,
+                    lastName = person.LastName,
+                    phoneNumbers = person.PhoneNumbers.Select(x => x.Number)
+                };
+            }
+            catch
+            {
+                response = NotFound(new { error = $"No person at ID {id} could be found." });
+            }
+
+            return response;
         }
 
 
@@ -116,18 +128,27 @@ namespace MVC_4Point1.Controllers
         [HttpGet("People/ID")]
         public ActionResult<object> GetPersonWithIDParameterized(int id)
         {
+            ActionResult<object> response;
             // This is what we are returning. It gets serialized as JSON if we return an object.
-            Person person = new PersonController().GetPersonByID(id);
-
-            // This is "kind of" a DTO. We're putting the fields we care about into another object that is not the database model.
-            // They help get around errors like the circular references, and (if you use them in the context) the missing virtual properties.
-            return new
+            try
             {
-                id = person.ID,
-                firstName = person.FirstName,
-                lastName = person.LastName,
-                phoneNumbers = person.PhoneNumbers.Select(x => x.Number)
-            };
+                Person person = new PersonController().GetPersonByID(id);
+                // This is "kind of" a DTO. We're putting the fields we care about into another object that is not the database model.
+                // They help get around errors like the circular references, and (if you use them in the context) the missing virtual properties.
+                response = new
+                {
+                    id = person.ID,
+                    firstName = person.FirstName,
+                    lastName = person.LastName,
+                    phoneNumbers = person.PhoneNumbers.Select(x => x.Number)
+                };
+            }
+            catch
+            {
+                response = NotFound(new { error = $"No person at ID {id} could be found." });
+            }
+
+            return response;
         }
 
         //6.
@@ -158,7 +179,7 @@ namespace MVC_4Point1.Controllers
             }
             catch (InvalidOperationException )
             {
-                response = NotFound(new { error = $"The requested person at ID {id} does not exist." });
+                response = NotFound(new { error = $"No entity exists at ID {id}." });
             }
             catch (Exception e)
             {
@@ -166,7 +187,40 @@ namespace MVC_4Point1.Controllers
             }
             return response;
         }
+        [HttpDelete("People/Delete")]
+        public ActionResult DeletePerson(string id)
+        {
+            ActionResult response;
 
+            // This logic should probably be in the DeletePersonByID() method, but if I change the parameter type to string now, I'll have to fix compiler errors in the Views.
+            int idParsed;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                response = Conflict(new { error = "ID was not provided." });
+            }
+            else
+            {
+                if (!int.TryParse(id, out idParsed))
+                {
+                    response = Conflict(new { error = "The provided ID is invalid." });
+                }
+                else
+                {
+                    try
+                    {
+                        new PersonController().DeletePersonByID(idParsed);
+                        response = Ok(new { message = $"Successfully deleted the person with ID {idParsed}." });
+                    }
+                    catch
+                    {
+                        response = NotFound(new { error = $"No person at ID {idParsed} could be found." });
+                    }
+                }
+            }
+            return response;
+        }
+
+        //8.
         [HttpPost("People/Create")]
         public ActionResult CreatePerson(string firstName, string lastName, string phone)
         {
